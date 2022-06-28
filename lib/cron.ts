@@ -1,6 +1,6 @@
 require('dotenv').config()
 const ModeratorBot = require('node-telegram-bot-api');
-import {getDisputedBans, setBan} from "./db";
+import {getBanRecord, getDisputedBans, setBan} from "./db";
 import request from "graphql-request";
 import {BigNumber} from "ethers";
 
@@ -30,7 +30,6 @@ import {BigNumber} from "ethers";
         'https://api.thegraph.com/subgraphs/name/rodsouto/telegram-moderator-bot',
         query
     )
-
     for (const question of result.questions) {
 
         const answer = BigNumber.from(question.answer);
@@ -44,7 +43,6 @@ import {BigNumber} from "ethers";
         const latestBanState = answer.toNumber();
 
         const ban = bans[question.id];
-
         if (latestBanState !== ban.active) {
 
             const finalized = question.finalize_ts <= Math.ceil(+new Date() / 1000);
@@ -55,14 +53,28 @@ import {BigNumber} from "ethers";
 
             if (latestBanState === 1) {
                 // ban
-                await setBan(question.id, true, finalized);
 
                 if (ban.app_type === 'telegram') {
                     // @ts-ignore
-                    await bot.banChatMember(ban.app_group_id, ban.app_user_id, {revoke_messages: false});
+                    if(finalized == true)
+                        await bot.restrictChatMember(ban.app_group_id, ban.app_user_id, {can_send_messages: false});
+                     else {
+                        await bot.restrictChatMember(ban.app_group_id, ban.app_user_id, {can_send_messages: true});
+                        const banHistory = await getBanRecord(ban.app_user_id);
+                        // exponential rehibilitation time. 1 day, 7 days, 2 months, 1 year.
+                        const rehibilitationTime = 86400 * Math.pow(7,banHistory);
+                        const paroleDate = Math. round((new Date()). getTime() / 1000) + rehibilitationTime;
+                        // cap at 7 days, permaban after.
+                        if (banHistory > 1)
+                            await bot.banChatMember(ban.app_group_id, ban.app_user_id);
+                        else
+                            await bot.banChatMember(ban.app_group_id, ban.app_user_id, {until_date: paroleDate});
+                     }
                 } else {
                     console.error(`Invalid app_type: ${ban.app_type}`);
                 }
+
+                await setBan(question.id, true, finalized);
 
             } else {
                 // unban
@@ -70,7 +82,7 @@ import {BigNumber} from "ethers";
 
                 if (ban.app_type === 'telegram') {
                     // @ts-ignore
-                    await bot.unbanChatMember(ban.app_group_id, ban.app_user_id, {only_if_banned: true});
+                    await bot.restrictChatMember(msg.chat.id, String(msg.reply_to_message.from.id), {can_send_messages: true});
                 } else {
                     console.error(`Invalid app_type: ${ban.app_type}`);
                 }

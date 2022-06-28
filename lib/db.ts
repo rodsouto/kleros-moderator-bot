@@ -54,6 +54,19 @@ const setGroupAccount = async (appGroupId: string, appType: string, address: str
     );
 }
 
+const setGroupGuild = async (appGroupId: string, appType: string, appGuildUserID: string, appGuildInviteUrl: string) => {
+    const db = await openDb();
+    await db.run(
+        'INSERT OR REPLACE INTO guild_groups (app_group_id, app_type, app_guild_user_id, app_guild_invite_url) VALUES ($appGroupId, $appType, $appGuildUserID, $appGuildInviteUrl);',
+        {
+            $appGroupId: appGroupId,
+            $appType: appType,
+            $appGuildUserID: appGuildUserID,
+            $appGuildInviteUrl: appGuildInviteUrl
+        }
+    );
+}
+
 const getBot = async(appGroupId: string, appType: string): Promise<{address: string, private_key: string} | undefined> => {
     const db = await openDb();
 
@@ -69,6 +82,22 @@ WHERE bot_groups.app_group_id = $appGroupId AND bot_groups.app_type = $appType`;
             $appType: appType,
         }
     );
+}
+
+const getGuildURL = async(appGroupId: number, appType: string) => {
+    const db = await openDb();
+
+    const result = await db.get('SELECT app_guild_invite_url FROM guild_groups WHERE app_group_id = ? AND app_type = ?', appGroupId, appType);
+
+    return result?.app_guild_invite_url || '';
+}
+
+const getGuildUserID = async(appGroupId: number, appType: string) => {
+    const db = await openDb();
+
+    const result = await db.get('SELECT app_guild_user_id FROM guild_groups WHERE app_group_id = ? AND app_type = ?', appGroupId, appType);
+
+    return result?.app_guild_user_id || '';
 }
 
 const setRules = async (chatId: number, rules: string) => {
@@ -160,11 +189,27 @@ const getDisputedBans = async() => {
     return await db.all('SELECT * FROM bans WHERE finalized = FALSE');
 }
 
+const getBanRecord = async(appUserId: string) => {
+    const db = await openDb();
+
+    const result = await db.get(
+        'SELECT COUNT(*) FROM bans WHERE finalized = TRUE AND active = TRUE AND appUserId = $appUserId',
+        {
+            $appUserId: appUserId
+        }
+    );
+
+    return result.total;
+}
+
 export {
     createBot,
     getBot,
+    getGuildUserID,
+    getGuildURL,
     isAccountOwner,
     setGroupAccount,
+    setGroupGuild,
     setRules,
     getRules,
     addMod,
@@ -172,5 +217,6 @@ export {
     isMod,
     addBan,
     setBan,
-    getDisputedBans
+    getDisputedBans,
+    getBanRecord
 }
