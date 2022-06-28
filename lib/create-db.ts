@@ -11,7 +11,7 @@ import {openDb} from "./db";
      * `app_type` can be `telegram`, `reddit`, etc.
      * `app_user_id` is the id of the user in `app_type`.
      */
-    await db.exec('CREATE TABLE bots (address TEXT PRIMARY KEY, private_key TEXT, app_type TEXT, app_user_id TEXT)');
+     await db.exec('CREATE TABLE bots (address TEXT PRIMARY KEY, private_key TEXT, app_type TEXT, app_user_id TEXT)');
 
     /**
      * A group can be a telegram chat, a subreddit, etc.
@@ -22,6 +22,14 @@ import {openDb} from "./db";
      */
     await db.exec('CREATE TABLE bot_groups (app_type TEXT, app_group_id TEXT, address TEXT, PRIMARY KEY (app_type, app_group_id))');
 
+    /**
+     * `app_type` + `app_user_id` is used to verify if the user is the owner of the bot.
+     *
+     * `app_type` can be `telegram`, `reddit`, etc.
+     * `app_group_id` is the id of the telegram group or the name of the subreddit.
+     * `app_user_id` is the id of the guild bot in `app_type`.
+     */
+     await db.exec('CREATE TABLE guild_groups (app_type TEXT, app_group_id TEXT, app_guild_user_id INTEGER, app_guild_invite_url TEXT, PRIMARY KEY (app_type, app_group_id))');
 
     /**
      * `question_id` is the id of the question in reality.eth
