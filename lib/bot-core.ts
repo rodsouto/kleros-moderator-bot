@@ -8,14 +8,15 @@ interface RealityBanResult {
     questionUrl: string
 }
 
-export const banUser = async (hasBanningPermission: boolean, fromUsername: string, rules: string, privateKey: string): Promise<RealityBanResult> => {
+export const banUser = async (hasBanningPermission: boolean, fromUsername: string, group: string, rules: string, privateKey: string): Promise<RealityBanResult> => {
 
-    const minBond = utils.parseUnits('1', 18); // 1 DAI
+    const minBond = utils.parseUnits('1', 16); // 0.01 DAI
 
-    const reward = hasBanningPermission ? minBond : 0;
+    const reward = 0;
 
     const questionId = await askQuestionWithMinBond(
         fromUsername,
+        group,
         rules,
         reward,
         minBond,
@@ -24,11 +25,11 @@ export const banUser = async (hasBanningPermission: boolean, fromUsername: strin
 
     return {
         questionId: questionId,
-        questionUrl: `https://reality.eth.link/app/index.html#!/network/100/question/${process.env.REALITITY_ETH_V30}-${questionId}`
+        questionUrl: `https://reality.eth.limo/app/#!/network/100/question/${process.env.REALITITY_ETH_V30}-${questionId}`
     };
 }
 
-async function askQuestionWithMinBond(fromUsername: string, rulesUrl: string, reward: number|BigNumber, minBond: number|BigNumber, privateKey: string): Promise<string> {
+async function askQuestionWithMinBond(fromUsername: string, group: string, rulesUrl: string,reward: number|BigNumber, minBond: number|BigNumber, privateKey: string): Promise<string> {
     // A question is automatically created in Realitio with an answer in favor of banning the user.
     // Bond of the answer: 1 xDAI (initially the answer can be omitted).
 
@@ -36,7 +37,7 @@ async function askQuestionWithMinBond(fromUsername: string, rulesUrl: string, re
     const outcomes = [];
     const category = 'misc';
 
-    const question = `Has ${fromUsername} infringed the Telegram group rules (${rulesUrl}) and should get banned?`;
+    const question = `Has ${fromUsername} infringed the Guild gated Telegram group,(${group}) rules (${rulesUrl}) and should get banned?`;
 
     const realityETHV30 = getRealityETHV30(process.env.REALITITY_ETH_V30, privateKey);
 
