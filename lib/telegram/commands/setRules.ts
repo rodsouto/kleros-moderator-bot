@@ -42,4 +42,4 @@ const callback: CommandCallback = async (bot: TelegramBot, msg: TelegramBot.Mess
     }
 }
 
-export {regexp, callback};
+export {regexp, callback, validateUrl};
