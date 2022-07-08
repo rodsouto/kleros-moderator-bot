@@ -1,6 +1,6 @@
 import * as TelegramBot from "node-telegram-bot-api";
 import {CommandCallback} from "../../../types";
-import {addBan, getBot, getRules, isMod} from "../../db";
+import {addBan, getBot, getRules} from "../../db";
 import {processCommand as addEvidenceCommand} from "./addEvidence"
 import {banUser} from "../../bot-core";
 
@@ -49,10 +49,7 @@ const callback: CommandCallback = async (bot: TelegramBot, msg: TelegramBot.Mess
 
         const user = await bot.getChatMember(msg.chat.id, String(msg.from.id));
 
-        const isAdmin = user.status === 'creator' || user.status === 'administrator';
-        const isModerator = await isMod(msg.chat.id, msg.from.id);
-
-        const hasBanningPermission = isAdmin || isModerator;
+        const hasBanningPermission = user.status === 'creator' || user.status === 'administrator';
 
         const {questionId, questionUrl: appealUrl} = await banUser(hasBanningPermission, fromUsername, rules, privateKey);
 

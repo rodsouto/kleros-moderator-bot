@@ -90,42 +90,6 @@ const getRules = async (chatId: number) => {
     return result?.rules || '';
 }
 
-const addMod = async (chatId: number, userId: number) => {
-    const db = await openDb();
-    await db.run(
-        'INSERT OR REPLACE INTO mods (chat_id, user_id) VALUES ($chatId, $userId);',
-        {
-            $chatId: chatId,
-            $userId: userId
-        }
-    );
-}
-
-const removeMod = async (chatId: number, userId: number) => {
-    const db = await openDb();
-    await db.run(
-        'DELETE FROM mods WHERE chat_id = $chatId AND user_id = $userId',
-        {
-            $chatId: chatId,
-            $userId: userId
-        }
-    );
-}
-
-const isMod = async (chatId: number, userId: number) => {
-    const db = await openDb();
-
-    const result = await db.get(
-        'SELECT COUNT(*) as total FROM mods WHERE chat_id = $chatId AND user_id = $userId',
-        {
-            $chatId: chatId,
-            $userId: userId
-        }
-    );
-
-    return result.total > 0;
-}
-
 const addBan = async (questionId: string, appType: string, appGroupId: string, appUserId: string, active: boolean) => {
     const db = await openDb();
 
@@ -167,9 +131,6 @@ export {
     setGroupAccount,
     setRules,
     getRules,
-    addMod,
-    removeMod,
-    isMod,
     addBan,
     setBan,
     getDisputedBans

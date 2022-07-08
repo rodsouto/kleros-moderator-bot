@@ -38,7 +38,5 @@ import {openDb} from "./db";
      */
     await db.exec('CREATE TABLE rules (chat_id INTEGER PRIMARY KEY, rules TEXT)');
 
-    await db.exec('CREATE TABLE mods (chat_id INTEGER, user_id INTEGER, PRIMARY KEY (chat_id, user_id))');
-
     console.log('database created');
 })();
