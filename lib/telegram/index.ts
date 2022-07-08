@@ -5,8 +5,6 @@ import * as TelegramBot from "node-telegram-bot-api";
 import * as newAccount from "../../lib/telegram/commands/newAccount";
 import * as setAccount from "../../lib/telegram/commands/setAccount";
 import * as getAccount from "../../lib/telegram/commands/getAccount";
-import * as addMod from "../../lib/telegram/commands/addMod";
-import * as removeMod from "../../lib/telegram/commands/removeMod";
 import * as setRules from "../../lib/telegram/commands/setRules";
 import * as getRules from "../../lib/telegram/commands/getRules";
 import * as ban from "../../lib/telegram/commands/ban";
@@ -19,10 +17,6 @@ const commands: {regexp: RegExp, callback: CommandCallback}[] = [
     newAccount,
     setAccount,
     getAccount,
-    {regexp: addMod.regexpReply, callback: addMod.callbackReply},
-    {regexp: addMod.regexpUserId, callback: addMod.callbackUserId},
-    {regexp: removeMod.regexpReply, callback: removeMod.callbackReply},
-    {regexp: removeMod.regexpUserId, callback: removeMod.callbackUserId},
     setRules,
     getRules,
     ban,
